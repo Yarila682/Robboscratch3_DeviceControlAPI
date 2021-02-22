@@ -34,7 +34,7 @@
     "flow-bin": "^0.68.0",
     "lodash.defaultsdeep": "^4.6.0",
     "webpack": "^3.10.0",
-    "webpack-dev-server": "^2.4.1",
+    "webpack-dev-server": "^3.9.0",
     "worker-loader": "1.1.0"
   }
 }
