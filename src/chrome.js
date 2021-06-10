@@ -26,7 +26,7 @@ console.log = function(string){
         log(string);
   }
 }
-console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.8");
+console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.9-MacOS-special");
 
 var import_settings = function(){
 
@@ -962,8 +962,8 @@ function InterfaceDevice(port){
    var NO_RESPONSE;
    var NO_START;
    var UNOTIME;
-   var qport = new _serialport(port.comName, options);
-   var LOG = "[" + port.comName + " random_object_identifier: " +  (Math.floor( Math.random() * 100) ) +  "] ";
+   var qport = new _serialport(port.path, options);
+   var LOG = "[" + port.path + " random_object_identifier: " +  (Math.floor( Math.random() * 100) ) +  "] ";
    console.log(LOG + "Trying to register a new device...");
    var state = DEVICE_STATES["INITED"];
    var previous_state = state;
@@ -1530,7 +1530,7 @@ function InterfaceDevice(port){
        if(error!=null)
        console.error("disconnect error: "+error);
        options.baudRate=38400;
-      qport = new _serialport(port.comName, options);
+      qport = new _serialport(port.path, options);
        qport.open(onConnect);//38400
        qport.on('error', function(err) {
         console.error('Error: '+err.message);
@@ -1667,8 +1667,8 @@ function InterfaceDevice(port){
 
    this.getPortName = function(){
      //console.warn("OU FUCK");
-     console.warn(this.port.comName);
-      return this.port.comName;
+     console.warn(this.port.path);
+      return this.port.path;
    }
 
    this.getSerialNumber = function(){
@@ -1926,7 +1926,7 @@ function InterfaceDevice(port){
  
         if (typeof(device_port) !== 'undefined'){
  
-         if (this.port.comName == device_port){
+         if (this.port.path == device_port){
  
            onClosedCb();
           }
@@ -1944,7 +1944,7 @@ function InterfaceDevice(port){
 
     }else{
 
-     if (this.port.comName == device_port){
+     if (this.port.path == device_port){
  
            onClosedCb();
            
@@ -1971,15 +1971,15 @@ const searchDevices = function(onDevicesFoundCb){
 
 
  var disconected_devices=0;
-    var onGetDevices = function(err,ports) {//NEW DEVICE SEARHING
+    var onGetDevices = function(ports) {//NEW DEVICE SEARHING
       for (var i=0; i<ports.length; i++) {
 
         //if(typeof(ports[i].vendorId) !== 'undefined'){
 
         //console.warn(`ports[i].comName: ${ports[i].comName}`);
 
-        if( ( (typeof(ports[i].manufacturer) !== 'undefined') || (ports[i].comName.indexOf("rfcom") != -1) || (ports[i].comName.indexOf("/dev/tty.") != -1) ) && (ports[i].comName.toLowerCase() !== 'com1') ){
-        console.warn(" NEW device name is "+ ports[i].comName);
+        if( ( (typeof(ports[i].manufacturer) !== 'undefined') || (ports[i].path.indexOf("rfcom") != -1) || (ports[i].path.indexOf("/dev/tty.") != -1) ) && (ports[i].path.toLowerCase() !== 'com1') ){
+        console.warn(" NEW device name is "+ ports[i].path);
         var device = new InterfaceDevice(ports[i]);
          arrDevices.push(device);
       }
@@ -2005,17 +2005,30 @@ const searchDevices = function(onDevicesFoundCb){
                     if (disconected_devices == (arrDevices.length)){
                              arrDevices = [];
                              console.log(arrDevices.length);
-                             _serialport.list(onGetDevices);
+                             _serialport.list().then(onGetDevices).catch((error) =>{
+
+                              console.error(error);
+                          });
                     }
               });
         }
     }
     else{
       console.log("ZEEEERRO");
-         _serialport.list(onGetDevices);
+      _serialport.list().then(onGetDevices).catch((error) =>{
+
+        console.error(error);
+    });
 
     }
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // _serialport.list().then(onGetDevices).catch((error) =>{
+
+  //     console.error(error);
+  // });
+   
+
 };
 
 const pushConnectedDevices = function(device){
