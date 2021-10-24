@@ -1978,7 +1978,7 @@ const searchDevices = function(onDevicesFoundCb){
 
         //console.warn(`ports[i].comName: ${ports[i].comName}`);
 
-        if( ( (typeof(ports[i].manufacturer) !== 'undefined') || (ports[i].path.indexOf("rfcom") != -1) || (ports[i].path.indexOf("/dev/tty.") != -1) ) && (ports[i].path.toLowerCase() !== 'com1') ){
+        if( ( (typeof(ports[i].manufacturer) !== 'undefined') || (ports[i].path.indexOf("rfcom") != -1) || (ports[i].path.indexOf("/dev/tty.usbserial") != -1) || (ports[i].path.indexOf("RNI-SPP") != -1)) && (ports[i].path.toLowerCase() !== 'com1') ){
         console.warn(" NEW device name is "+ ports[i].path);
         var device = new InterfaceDevice(ports[i]);
          arrDevices.push(device);
