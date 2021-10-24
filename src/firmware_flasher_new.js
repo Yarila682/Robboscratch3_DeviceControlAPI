@@ -238,25 +238,41 @@ var onConnect = function(){
                ////////////////////////////////////////////////////////////////////////////////huinya
 }
 
-var ROFL = function(err,ports){
+var ROFL = function(ports){
   console.warn("IN SUK");
+  print_status("Scanning ports...");
+  var all_ports_are_bad = true;
   for (var i=0; i<ports.length; i++) {
+    //print_status(LOG + `vendorId: ${ports[i].vendorId}`);
     if(typeof(ports[i].vendorId) !== 'undefined'){
     console.warn("SRAVNIVAU"+ports[i].comName + " and "+port_path );
     if(ports[i].comName==port_path){
-      console.log("OPENING PORT epta");
+      all_ports_are_bad = false;
+      console.log("OPENING PORT");
+      print_status(LOG+"Opening port...");
       qport = new _serialport(ports[i].comName, options);
-      qport.open(()=>{qport.on('error', function(err) {
-             console.log('Error: '+ err.message);});
+      qport.open(()=>{qport.on('error', (err) => {
+                                            console.log('Error: '+ err.message);
+                                            print_status(LOG+'Error: '+ err.message);
+                                         });
             onConnect();});
     }
   }
   }
+  if (all_ports_are_bad){
+    print_status(LOG+'Error: '+ "Device lost. ");
+  }
 }
+
+print_status("Start flashing!");
 
 import_firm_settings();
 
-_serialport.list(ROFL);
+_serialport.list().then(ROFL).catch((error) =>{
+
+  print_status(LOG+'Error: '+ error);
+  console.error(error);
+});
 
   //   chrome.serial.connect(port_path, {bitrate: bitrate}, onConnect);
 
