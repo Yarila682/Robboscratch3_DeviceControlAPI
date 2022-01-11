@@ -876,16 +876,25 @@ getSensorData(sensor_name:string):number{
 
                       case "temperature":
 
-                        if ([1,2,4].indexOf(this.ConnectedLaboratories[0].getDeviceID()) != -1){
+                        if ([1,2].indexOf(this.ConnectedLaboratories[0].getDeviceID()) != -1){
 
-                              return Math.round((this.SensorsData[`a${pin*2}`] * 256 + this.SensorsData[`a${pin*2 + 1}`]) *  0.244379276637341153);
+                              console.log(this.SensorsData);
+                              let rawSensorValue = this.SensorsData[`a${pin*2}`] * 256 + this.SensorsData[`a${pin*2 + 1}`];
+                              console.log(`rawSensorValue: ${rawSensorValue}`);
+                              let kelvin = (rawSensorValue / 1023 * 4.8 * 100);
+                              console.log(`kelvin: ${kelvin}`);
+                              let celsius = kelvin - 273.15; // convert to Celsius
+
+                              let temperatureValue = celsius;
+
+                              return temperatureValue;
 
                         }
-                        // else if([4].indexOf(this.ConnectedLaboratories[0].getDeviceID()) != -1){
-                        //
-                        //       return Math.round((this.SensorsData[`a${2}`] * 256 + this.SensorsData[`a${3}`]) *  0.244379276637341153);
-                        //
-                        // }
+                        else if([4].indexOf(this.ConnectedLaboratories[0].getDeviceID()) != -1){
+                        
+                          return Math.round((this.SensorsData[`a${pin*2}`] * 256 + this.SensorsData[`a${pin*2 + 1}`]) *  0.244379276637341153);
+                        
+                        }
                         else{
 
                                 return this.SensorsData[`a${pin*2}`] * 256 + this.SensorsData[`a${pin*2 + 1}`];

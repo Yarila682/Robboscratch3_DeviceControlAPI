@@ -26,7 +26,7 @@ console.log = function(string){
         log(string);
   }
 }
-console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.8");
+console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.9");
 
 var import_settings = function(){
 
@@ -1976,7 +1976,7 @@ const searchDevices = function(onDevicesFoundCb){
 
         //if(typeof(ports[i].vendorId) !== 'undefined'){
 
-        //console.warn(`ports[i].comName: ${ports[i].comName}`);
+        //console.warn(`ports[i].comName: ${ports[i].comName} ${ports[i].manufacturer}`);
 
         if( ( (typeof(ports[i].manufacturer) !== 'undefined') || (ports[i].comName.indexOf("rfcom") != -1) || (ports[i].comName.indexOf("/dev/tty.") != -1) ) && (ports[i].comName.toLowerCase() !== 'com1') ){
         console.warn(" NEW device name is "+ ports[i].comName);
