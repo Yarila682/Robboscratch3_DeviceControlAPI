@@ -26,7 +26,7 @@ console.log = function(string){
         log(string);
   }
 }
-console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.9-MacOS-special");
+console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.10-MacOS-special");
 
 var import_settings = function(){
 
@@ -1978,7 +1978,7 @@ const searchDevices = function(onDevicesFoundCb){
 
         //console.warn(`ports[i].comName: ${ports[i].comName}`);
 
-        if( ( (typeof(ports[i].manufacturer) !== 'undefined') || (ports[i].path.indexOf("rfcom") != -1) || (ports[i].path.indexOf("/dev/tty.usbserial") != -1) || (ports[i].path.indexOf("RNI-SPP") != -1)) && (ports[i].path.toLowerCase() !== 'com1') ){
+        if( ( (typeof(ports[i].manufacturer) !== 'undefined') || (ports[i].path.indexOf("rfcom") != -1) || (ports[i].path.indexOf("/dev/tty.usbserial") != -1) || (ports[i].path.indexOf("/dev/tty.ROBBO") != -1) || (ports[i].path.indexOf("RNI-SPP") != -1)) && (ports[i].path.toLowerCase() !== 'com1') ){
         console.warn(" NEW device name is "+ ports[i].path);
         var device = new InterfaceDevice(ports[i]);
          arrDevices.push(device);
