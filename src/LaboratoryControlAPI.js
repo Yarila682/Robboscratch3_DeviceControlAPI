@@ -878,14 +878,14 @@ getSensorData(sensor_name:string):number{
 
                         if ([1,2].indexOf(this.ConnectedLaboratories[0].getDeviceID()) != -1){
 
-                              console.log(this.SensorsData);
+                              //console.log(this.SensorsData);
                               let rawSensorValue = this.SensorsData[`a${pin*2}`] * 256 + this.SensorsData[`a${pin*2 + 1}`];
-                              console.log(`rawSensorValue: ${rawSensorValue}`);
+                             // console.log(`rawSensorValue: ${rawSensorValue}`);
                               let kelvin = (rawSensorValue / 1023 * 4.8 * 100);
-                              console.log(`kelvin: ${kelvin}`);
+                              //console.log(`kelvin: ${kelvin}`);
                               let celsius = kelvin - 273.15; // convert to Celsius
 
-                              let temperatureValue = celsius;
+                              let temperatureValue = Math.round(celsius);
 
                               return temperatureValue;
 
