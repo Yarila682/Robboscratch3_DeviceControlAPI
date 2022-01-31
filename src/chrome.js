@@ -8,10 +8,10 @@ const DEVICE_HANDLE_TIMEOUT_MAX = 100000;
 const NO_RESPONSE_TIME_MAX = 100000;
 const NO_START_TIMEOUT_MAX = 100000;
 
-const DEVICE_HANDLE_TIMEOUT_DEFAULT = 10000;
+const DEVICE_HANDLE_TIMEOUT_DEFAULT = 7001;
 const NO_RESPONSE_TIME_DEFAULT = 3000;
 const NO_START_TIMEOUT_DEFAULT = 3000;
-const UNO_TIMEOUT_DEFAULT = 3000;
+const UNO_TIMEOUT_DEFAULT = 7000;
 
 
 var DEVICE_HANDLE_TIMEOUT = DEVICE_HANDLE_TIMEOUT_DEFAULT;
@@ -26,7 +26,7 @@ console.log = function(string){
         log(string);
   }
 }
-console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.10-MacOS-special");
+console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.19-MacOS-special");
 
 var import_settings = function(){
 
@@ -79,6 +79,11 @@ const DEVICE_STATES = Object.freeze({
    "DEVICE_IS_READY": 6,
    "DEVICE_ERROR":7,
    "TIMEOUT":8
+});
+
+const ROBBO_DEVICE_TYPES = Object.freeze({
+  "NANO_BASED": 0,
+  "UNO_BASED": 1
 });
 
 const commands_list_otto= {
@@ -997,6 +1002,8 @@ function InterfaceDevice(port){
    var old_command = '';
    var firmwareVersionDiffers = false;
    var isBluetoothDevice = false;
+   var isMacBluetooth = false;
+   var robboDeviceType = ROBBO_DEVICE_TYPES["NANO_BASED"];
 
    var DEVICE_STATE_CHECK_INTERVAL;
 
@@ -1302,7 +1309,7 @@ function InterfaceDevice(port){
       if(bufIncomingData.length > (DEVICE_SERIAL_NUMBER_PROBE_INTERVAL+iSerialNumberOffset)){
            if((iSerialNumberOffset < 0)||(!(check_correct_serial(sIncomingData)))){
             console.log(LOG + "Rubbish instead of serial number");
-            state = DEVICE_STATES["DEVICE_IS_RUBBISH"];
+           // state = DEVICE_STATES["DEVICE_IS_RUBBISH"];
             bufIncomingData = new Uint8Array();
             setTimeout(checkSerialNumber, 100);
            }
@@ -1344,7 +1351,25 @@ function InterfaceDevice(port){
            let checkSerialNumberTimeout =   setTimeout(checkSerialNumber, 50); //100
          }
          else{
-                  console.log(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
+
+          if ( qport !== null &&  qport!== 'undefined'){
+            console.warn(LOG + "Closing...");
+            qport.close((error) => {
+            
+              // TODO: handle the error
+                if(error!=null){
+                  console.error(LOG + "disconnect error: " + error);
+                }
+                qport = null;
+
+                console.warn(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
+             });
+           }else{
+            console.warn(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
+          }
+           
+
+           //console.log(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
          }
       }
    }
@@ -1472,20 +1497,42 @@ function InterfaceDevice(port){
 
    this.stopCheckingSerialNumber = function(cb){
      clearTimeout(NO_RESPONSE);
+     clearTimeout(UNOTIME);
      clearInterval(DEVICE_STATE_CHECK_INTERVAL);
      state= DEVICE_STATES["CLOSING"];
-     console.warn(LOG+" Device stopped");
      // if (!isStopCheckingSerialNumber){
      //   isStopCheckingSerialNumber = true;
-       qport.close((error) => {
-      // TODO: handle the error
-        if(error!=null)
-        console.error("disconnect error: "+error);
-         clearTimeout(automaticStopCheckingSerialNumberTimeout);
-            if (cb){
-              cb();
-            }
-          });
+     console.warn(LOG + "Closing...");
+      
+     if ( qport !== null &&  qport!== 'undefined'){
+      console.warn(LOG + "Port exists. Closing...");
+
+      qport.close((error) => {
+        // TODO: handle the error
+          if(error!=null){
+            console.error("disconnect error: "+error);
+          }
+          qport = null;
+          clearTimeout(automaticStopCheckingSerialNumberTimeout);
+
+          console.warn(LOG+" Device stopped");
+
+              if (cb){
+                cb();
+              }
+            });
+
+     }else{
+
+      clearTimeout(automaticStopCheckingSerialNumberTimeout);
+
+      console.warn(LOG+" Device stopped");
+          
+      if (cb){
+        cb();
+      }
+
+     } 
 
           
 
@@ -1496,6 +1543,27 @@ function InterfaceDevice(port){
       isBluetoothDevice = true;
    }
 
+   if ((node_process.platform === "darwin") && (port.path.indexOf("-R-"))){
+
+      isMacBluetooth = true;
+   }
+
+   if ((node_process.platform === "darwin") && (port.path.indexOf("/dev/tty.usbmodem"))){
+
+        robboDeviceType = ROBBO_DEVICE_TYPES["UNO_BASED"];
+   }
+
+   if (typeof(onDeviceStatusChangeCb) == 'function'){
+
+     let result = {
+
+        state:state,
+        deviceId: iDeviceID
+      }
+
+      onDeviceStatusChangeCb(result);
+
+   }
 
      if(!qport.isOpen)
      {
@@ -1520,38 +1588,45 @@ function InterfaceDevice(port){
       else {
         onConnect();
       }
-      UNOTIME = setTimeout(()=>{
-        console.log(state);
-        if(state != DEVICE_STATES["DEVICE_IS_READY"])
-      {
-        console.log("Its UNO time!");
-        qport.close((error) => {
-          // TODO: handle the error
-       if(error!=null)
-       console.error("disconnect error: "+error);
-       options.baudRate=38400;
-      qport = new _serialport(port.path, options);
-       qport.open(onConnect);//38400
-       qport.on('error', function(err) {
-        console.error('Error: '+err.message);
 
-        if (onErrorCb){
+      if ( ((node_process.platform === "darwin") && (robboDeviceType == ROBBO_DEVICE_TYPES["UNO_BASED"]) ) || (node_process.platform !== "darwin") ){
 
-          var error  = {};
+          UNOTIME = setTimeout(()=>{
+            console.log(state);
+            if(state != DEVICE_STATES["DEVICE_IS_READY"])
+          {
+            console.warn("Its UNO time!");
+            qport.close((error) => {
 
-             error.code = 2;
-             error.msg = err.message;
+              // TODO: handle the error
+          if(error!=null){
+            console.error("disconnect error: "+error);
+          }
+          
+          options.baudRate=38400;
+          qport = null;
+          qport = new _serialport(port.path, options);
+          qport.open(onConnect);//38400
+          qport.on('error', function(err) {
+            console.error('Error: '+err.message);
 
-            onErrorCb(error);
+            if (onErrorCb){
 
-        }
+              var error  = {};
 
-        });
-        });
-      }
-    },UNO_TIMEOUT);
+                error.code = 2;
+                error.msg = err.message;
 
+                onErrorCb(error);
 
+            }
+
+            });
+            });
+          }
+        },UNO_TIMEOUT);
+
+      }  
 
  /*
    this.try_to_reconnect = function(){
@@ -1651,6 +1726,15 @@ function InterfaceDevice(port){
 
     return isBluetoothDevice;
  }
+
+ this.isMacBluetooth = function(){
+
+    return isMacBluetooth;
+}
+
+this.getDeviceType = function(){
+  return robboDeviceType;
+}
 
  this.getRecieveTimeDelta = function(){
 
@@ -1978,7 +2062,7 @@ const searchDevices = function(onDevicesFoundCb){
 
         //console.warn(`ports[i].comName: ${ports[i].comName}`);
 
-        if( ( (typeof(ports[i].manufacturer) !== 'undefined') || (ports[i].path.indexOf("rfcom") != -1) || (ports[i].path.indexOf("/dev/tty.usbserial") != -1) || (ports[i].path.indexOf("/dev/tty.ROBBO") != -1) || (ports[i].path.indexOf("RNI-SPP") != -1)) && (ports[i].path.toLowerCase() !== 'com1') ){
+        if( ( (typeof(ports[i].manufacturer) !== 'undefined') || (ports[i].path.indexOf("rfcom") != -1) || (ports[i].path.indexOf("/dev/tty.usbserial") != -1) || (ports[i].path.indexOf("/dev/tty.ROBBO") != -1) || (ports[i].path.indexOf("/dev/tty.ROB") != -1) || (ports[i].path.indexOf("RNI-SPP") != -1)) && (ports[i].path.toLowerCase() !== 'com1') ){
         console.warn(" NEW device name is "+ ports[i].path);
         var device = new InterfaceDevice(ports[i]);
          arrDevices.push(device);
