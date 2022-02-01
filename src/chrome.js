@@ -26,7 +26,7 @@ console.log = function(string){
         log(string);
   }
 }
-console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.19-MacOS-special");
+console.log("Robboscratch3_DeviceControlAPI-module-version-1.0.22-MacOS-special");
 
 var import_settings = function(){
 
@@ -1352,24 +1352,24 @@ function InterfaceDevice(port){
          }
          else{
 
-          if ( qport !== null &&  qport!== 'undefined'){
-            console.warn(LOG + "Closing...");
-            qport.close((error) => {
+          // if ( qport !== null &&  qport!== 'undefined'){
+          //   console.warn(LOG + "Closing...");
+          //   qport.close((error) => {
             
-              // TODO: handle the error
-                if(error!=null){
-                  console.error(LOG + "disconnect error: " + error);
-                }
-                qport = null;
+          //     // TODO: handle the error
+          //       if(error!=null){
+          //         console.error(LOG + "disconnect error: " + error);
+          //       }
+          //       qport = null;
 
-                console.warn(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
-             });
-           }else{
-            console.warn(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
-          }
+          //       console.warn(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
+          //    });
+          //  }else{
+          //   console.warn(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
+          // }
            
 
-           //console.log(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
+           console.log(LOG + "Out of checkSerialNumber timeout. " + "State: " + state);
          }
       }
    }
@@ -1462,37 +1462,51 @@ function InterfaceDevice(port){
 
           automaticStopCheckingSerialNumberTimeout =  setTimeout(() => {
 
-          console.warn("Stop checking serial number.");
+              console.warn("Stop checking serial number.");
+              
+              isStopCheckingSerialNumber = true;
+
+              if ((state != DEVICE_STATES["DEVICE_IS_READY"] ) && (state != DEVICE_STATES["DEVICE_ERROR"]) ){
+
+                state = DEVICE_STATES["TIMEOUT"];
+
+                if ( qport !== null &&  qport!== 'undefined'){
+                  console.warn(LOG + "Port exists. Closing...");
+            
+                  qport.close((error) => {
+                    // TODO: handle the error
+                      if(error!=null){
+                        console.error("disconnect error: "+error);
+                      }
+                      qport = null;
+                      console.warn(LOG+" Device stopped");
+            
+                      if (typeof(onDeviceStatusChangeCb) == 'function'){
+
+                        let error = {};
+                        error.code = -1;
+                        error.msg = "";
           
-          isStopCheckingSerialNumber = true;
-
-          if ((state != DEVICE_STATES["DEVICE_IS_READY"] ) && (state != DEVICE_STATES["DEVICE_ERROR"]) ){
-
-            state = DEVICE_STATES["TIMEOUT"];
-
-            if (typeof(onDeviceStatusChangeCb) == 'function'){
-
-              let error = {};
-              error.code = -1;
-              error.msg = "";
-
-                let result = {
-
-                    state:state,
-                    deviceId: iDeviceID,
-                    error:error
+                          let result = {
+          
+                              state:state,
+                              deviceId: iDeviceID,
+                              error:error
+                          }
+          
+                         onDeviceStatusChangeCb(result);
+          
+                       } 
+                      
+                  });
+            
                 }
 
-               onDeviceStatusChangeCb(result);
-
-             }
-
-
-          }
+              }
 
          
 
-           }  ,DEVICE_HANDLE_TIMEOUT);
+          }  ,DEVICE_HANDLE_TIMEOUT);
    }
 
    this.stopCheckingSerialNumber = function(cb){
@@ -1543,15 +1557,18 @@ function InterfaceDevice(port){
       isBluetoothDevice = true;
    }
 
-   if ((node_process.platform === "darwin") && (port.path.indexOf("-R-"))){
+   if ((node_process.platform === "darwin") && (port.path.indexOf("-R-") !== -1)){
 
       isMacBluetooth = true;
    }
 
-   if ((node_process.platform === "darwin") && (port.path.indexOf("/dev/tty.usbmodem"))){
+   if ((node_process.platform === "darwin") && (port.path.indexOf("/dev/tty.usbmodem") !== -1)){
 
         robboDeviceType = ROBBO_DEVICE_TYPES["UNO_BASED"];
    }
+
+   console.warn(`isMacBluetooth: ${isMacBluetooth}`);
+   console.warn(`robboDeviceType: ${robboDeviceType}`);
 
    if (typeof(onDeviceStatusChangeCb) == 'function'){
 
