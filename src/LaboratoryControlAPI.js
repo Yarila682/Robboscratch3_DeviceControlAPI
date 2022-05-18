@@ -876,20 +876,34 @@ getSensorData(sensor_name:string):number{
 
                       case "temperature":
 
+                     
                         if ([1,2].indexOf(this.ConnectedLaboratories[0].getDeviceID()) != -1){
 
-                              //console.log(this.SensorsData);
-                              let rawSensorValue = this.SensorsData[`a${pin*2}`] * 256 + this.SensorsData[`a${pin*2 + 1}`];
-                             // console.log(`rawSensorValue: ${rawSensorValue}`);
-                              let kelvin = (rawSensorValue / 1023 * 4.8 * 100);
-                              //console.log(`kelvin: ${kelvin}`);
-                              let celsius = kelvin - 273.15; // convert to Celsius
+                          //console.log(this.SensorsData);
+                          let rawSensorValue = this.SensorsData[`a${pin*2}`] * 256 + this.SensorsData[`a${pin*2 + 1}`];
+                          //console.log(`rawSensorValue: ${rawSensorValue}`);
 
-                              let temperatureValue = Math.round(celsius);
+                          let voltageValue = rawSensorValue / 1023 * 5.0;
 
-                              return temperatureValue;
+
+                          //console.log(`voltageValue: ${voltageValue}`);
+
+                          let celsius = -1481.96 + Math.sqrt((1.8639 - voltageValue) / (3.88 * Math.pow(10,-6)) + 2.1962 * Math.pow(10,6));
+
+                          // let kelvin = (rawSensorValue / 1023 * 9.2 * 100); //4.8
+                          // console.log(`kelvin: ${kelvin}`);
+                          //let celsius = kelvin - 273.15; // convert to Celsius
+
+                          let temperatureValue = Math.round(celsius);
+
+                          //let temperatureValue = celsius;
+
+                          //console.log(`Celsius: ${temperatureValue }`);
+
+                          return temperatureValue;
 
                         }
+
                         else if([4].indexOf(this.ConnectedLaboratories[0].getDeviceID()) != -1){
                         
                           return Math.round((this.SensorsData[`a${pin*2}`] * 256 + this.SensorsData[`a${pin*2 + 1}`]) *  0.244379276637341153);
