@@ -7,6 +7,8 @@ import {InterfaceDevice,searchDevices,getConnectedDevices,pushConnectedDevices,D
 
 import {getConnectedBluetoothDevices} from './bluetooth-chrome';
 
+import {getConnectedBLEDevices} from './bluetooth-ble-esp32';
+
 
 const DEVICE_HANDLE_TIMEOUT:number = 1 * 60 * 1000;
 //const DEVICE_HANDLE_TIMEOUT:number = 1 * 4 * 1000;
@@ -369,10 +371,12 @@ export default class RobotControlAPI extends DeviceControlAPI {
       //     console.log("let's get devices from device finder");
             let devices:Array<InterfaceDevice> = getConnectedDevices();
             let bluetooth_devices:Array<InterfaceDevice> = getConnectedBluetoothDevices();
+            let bluetooth_ble_devices:Array<InterfaceDevice> = getConnectedBLEDevices();
+
 
             // if (self.ConnectedDevices.length != devices.length ){
             //
-                    self.ConnectedDevices = devices.concat(bluetooth_devices);
+                    self.ConnectedDevices = devices.concat(bluetooth_devices).concat(bluetooth_ble_devices);
 
 
                     handleConnectedDevices(self.ConnectedDevices,self);
@@ -494,8 +498,8 @@ export default class RobotControlAPI extends DeviceControlAPI {
 
                      }else{
 
-                  //   console.log("Device ID: " + device.getDeviceID()  + " " + "State:  " + device.getState() + " " + "State name: " + self.getStateNameByID(device.getState())
-                  //                 + " " + "Device serial: " + device.getSerialNumber() );
+                    // console.warn("Device ID: " + device.getDeviceID()  + " " + "State:  " + device.getState() + " " + "State name: " + self.getStateNameByID(device.getState())
+                    //               + " " + "Device serial: " + device.getSerialNumber() );
 
                      }
 
@@ -512,7 +516,7 @@ export default class RobotControlAPI extends DeviceControlAPI {
 
           }else{
 
-        //     console.log("Devices array is empty");
+            // console.warn("Devices array is empty");
 
           }
 

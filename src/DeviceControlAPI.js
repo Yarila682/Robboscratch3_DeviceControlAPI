@@ -31,6 +31,13 @@ import {
   set_all_intervals_bluetooth,
 } from './bluetooth-chrome';
 
+import {
+
+  searchBLEDevices
+
+} from './bluetooth-ble-esp32';
+
+
 import {flash_firmware,search_ports} from './firmware_flasher_new';
 
 export default  class DeviceControlAPI {
@@ -66,11 +73,81 @@ export default  class DeviceControlAPI {
 
       searchAllDevices(){
 
+        console.warn("search all devices");
+
         //var devices = [];
+
+
+            searchBLEDevices((devices) => {
+
+              this.onDevicesStartSearchingCb();
+
+              this.deviceList = devices;
+
+              if (devices.length == 0){
+
+                this.onDevicesNotFoundCb();
+              }
+
+              for (let index = 0; index < devices.length; index++){
+
+                  if (devices[index] == null) return;
+
+                  devices[index].registerFirmwareVersionDiffersCallback( (result) => {
+
+
+                    let cb =  this.onFirmwareVersionDiffersCbMap[devices[index].getPortName()];
+
+                    if (typeof(cb) == 'function'){
+
+                      cb(result);
+
+                    }
+
+                    
+
+                  });
+
+                  devices[index].registerErrorCallback(this.onErrorCb);
+                
+                  devices[index].registerDeviceStatusChangeCallback((state) => {
+
+                    let cb =  this.onDeviceStatusChangeCbMap[devices[index].getPortName()];
+
+                    if (typeof(cb) == 'function'){
+
+                      cb(state);
+
+                    }
+
+                  
+
+                  });
+
+
+                  let device = {
+
+                    // deviceSerial: devices[index].getShorterSerialNumber(),
+                      devicePort: devices[index].getPortName(),
+                      deviceId: devices[index].getDeviceID() 
+                    // deviceFirmwareVersion: devices[index].getFirmwareVersion()
+                  }
+
+                    //  console.warn("onDeviceFound");
+
+                    this.onDeviceFoundCb(device);
+
+              }
+
+            }); 
+
+             return;
 
         
 
             searchDevices((devices) => {
+
+              console.warn("serach devices callback");
 
               this.onDevicesStartSearchingCb();
 
