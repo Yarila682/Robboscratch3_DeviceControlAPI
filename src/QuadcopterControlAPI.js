@@ -1347,58 +1347,58 @@ export default class QuadcopterControlAPI extends DeviceControlAPI {
 
 
 
-        telemetry_element_table[123] = {
+        telemetry_element_table[216] = {
         
                           telemetry_element_type: 0x07,
                           telemetry_element_group_and_name:"",
                           telemetry_element_group:  "stateEstimate",
                           telemetry_element_name:    "x",
-                          telemetry_element_id:     123
+                          telemetry_element_id:     216
         
                                   }
         
-        telemetry_element_table[124] = {
+        telemetry_element_table[217] = {
         
                           telemetry_element_type: 0x07,
                           telemetry_element_group_and_name:"",
                           telemetry_element_group:  "stateEstimate",
                           telemetry_element_name:    "y",
-                          telemetry_element_id:     124
+                          telemetry_element_id:     217
         
                                   }
         
-        telemetry_element_table[125] = {
+        telemetry_element_table[218] = {
         
                           telemetry_element_type: 0x07,
                           telemetry_element_group_and_name:"",
                           telemetry_element_group:  "stateEstimate",
                           telemetry_element_name:    "z",
-                          telemetry_element_id:     125
+                          telemetry_element_id:     218
         
                                   }
         
-        telemetry_element_table[134] = {
+        telemetry_element_table[227] = {
         
                             telemetry_element_type: 0x07,
                             telemetry_element_group_and_name:"",
                             telemetry_element_group:  "stateEstimate",
                             telemetry_element_name:    "yaw",
-                            telemetry_element_id:     134
+                            telemetry_element_id:     227
         
                                     }
         
-        telemetry_element_table[12] = {
+        telemetry_element_table[85] = {
         
                             telemetry_element_type: 0x07,
                             telemetry_element_group_and_name:"",
                             telemetry_element_group:  "pm",
                             telemetry_element_name:    "vbat",
-                            telemetry_element_id:     12
+                            telemetry_element_id:     85
         
                                     }
         
         
-        prefered_telemetry_table = [123,124,125,134,12];
+        prefered_telemetry_table = [216,217,218,227,85]; //2023.07 - version 
         
         telemetry_object.telemetry_element_table  = telemetry_element_table;
         telemetry_object.prefered_telemetry_table = prefered_telemetry_table;
@@ -1588,21 +1588,21 @@ export default class QuadcopterControlAPI extends DeviceControlAPI {
 
         if (typeof(this.telemetryData.x) != 'undefined'){
 
-          if (this.telemetry_x_delta > 0){
+          // if (this.telemetry_x_delta > 0){
 
-              if (this.telemetryData.x > 0){
+          //     if (this.telemetryData.x > 0){
 
-                 x_coord = this.telemetryData.x - this.telemetry_x_delta;
+          //        x_coord = this.telemetryData.x - this.telemetry_x_delta;
 
-              }else{
+          //     }else{
 
-                    x_coord = this.telemetryData.x - this.telemetry_x_delta;
+          //           x_coord = this.telemetryData.x - this.telemetry_x_delta;
 
-              }
+          //     }
 
               
 
-          }
+          // }
           //   else{ //this.telemetry_x_delta < 0
 
           //       if (this.telemetryData.x > 0){
@@ -1616,8 +1616,10 @@ export default class QuadcopterControlAPI extends DeviceControlAPI {
           //     }
 
           // }
+
+          x_coord = this.telemetryData.x; 
            
-            x_coord = x_coord.toFixed(2);
+          x_coord = x_coord.toFixed(2);
 
         }
 
@@ -1635,21 +1637,21 @@ export default class QuadcopterControlAPI extends DeviceControlAPI {
 
         if (typeof(this.telemetryData.y) != 'undefined'){
 
-             if (this.telemetry_y_delta > 0){
+          //    if (this.telemetry_y_delta > 0){
 
-              if (this.telemetryData.y > 0){
+          //     if (this.telemetryData.y > 0){
 
-                 y_coord = this.telemetryData.y - this.telemetry_y_delta;
+          //        y_coord = this.telemetryData.y - this.telemetry_y_delta;
 
-              }else{
+          //     }else{
 
-                    y_coord = this.telemetryData.y - this.telemetry_y_delta;
+          //           y_coord = this.telemetryData.y - this.telemetry_y_delta;
 
-              }
+          //     }
 
               
 
-          }
+          // }
           //   else{ //this.telemetry_y_delta < 0
 
           //       if (this.telemetryData.y > 0){
@@ -1663,6 +1665,8 @@ export default class QuadcopterControlAPI extends DeviceControlAPI {
           //     }
 
           // }
+
+           y_coord = this.telemetryData.y;
 
             y_coord = y_coord * (-1); //Invert y axis;
           
